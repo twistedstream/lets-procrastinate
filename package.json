@@ -1,0 +1,45 @@
+{
+  "name": "lets-procrastinate",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Let's Procrastinate web app",
+  "engines": {
+    "node": ">=20.11.0",
+    "npm": ">=10.2.4"
+  },
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon ./server.js",
+    "image:build": "docker build --tag \"${npm_package_config_docker_org}/${npm_package_name}:${npm_package_version}\" .",
+    "image:remove": "docker rmi -f \"${npm_package_config_docker_org}/${npm_package_name}:${npm_package_version}\"",
+    "container:run": "docker run --env-file ./.docker.env --name \"${npm_package_name}\" -d -p 8000:8000 -e LOG_LEVEL=debug \"${npm_package_config_docker_org}/${npm_package_name}:${npm_package_version}\"",
+    "container:logs": "docker logs -f \"${npm_package_name}\"",
+    "container:stop": "docker stop \"${npm_package_name}\"",
+    "container:ssh": "docker exec -it \"${npm_package_name}\" /bin/sh",
+    "container:remove": "docker rm -f \"${npm_package_name}\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/twistedstream/lets-procrastinate.git"
+  },
+  "author": "twistedstream",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/twistedstream/lets-procrastinate/issues"
+  },
+  "homepage": "https://github.com/twistedstream/lets-procrastinate#readme",
+  "dependencies": {
+    "dotenv": "^16.4.4",
+    "express": "^4.18.2",
+    "express-async-errors": "^3.1.1",
+    "express-handlebars": "^7.1.2",
+    "handlebars": "^4.7.8",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  },
+  "config": {
+    "docker_org": "twistedstream"
+  }
+}

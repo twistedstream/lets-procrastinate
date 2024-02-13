@@ -1,0 +1,16 @@
+# Development
+.git/
+.vscode/
+cert/
+scripts/
+node_modules/
+npm-debug.log
+.env
+.gitignore
+.nvmrc
+*.md
+LICENSE
+
+# Docker
+Dockerfile
+.dockerignore
