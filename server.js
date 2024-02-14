@@ -5,16 +5,29 @@ const express = require("express");
 const logger = require("morgan");
 const http = require("http");
 const https = require("https");
+const { engine } = require("express-handlebars");
 
 const package = require("./package.json");
+const routes = require("./routes");
 
 const app = express();
 
+// global middlewares
+
 app.use(logger("dev"));
 
-app.get("/", (_req, res) => {
-  res.send("ok");
-});
+app.use(express.static(path.join(__dirname, "public")));
+
+app.set("view engine", "handlebars");
+app.engine(
+  "handlebars",
+  engine({
+    defaultLayout: "main",
+  })
+);
+
+// routes
+app.use(routes);
 
 const port = process.env.PORT || 3000;
 
