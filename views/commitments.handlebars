@@ -4,13 +4,66 @@
 
   {{#*inline "body"}}
     
-    The things I'm not getting done:
+    <h3 class="mb-4 text-center">
+      All of the things
+      <small class="text-muted">that I'm <u>not</u> getting done</small>
+    </h3>
 
-    <ul>
-      <li>One</li>
-      <li>Two</li>
-      <li>Three</li>
-    </ul>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      {{#each commitments}}
+      <div class="col">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">{{description}}</h5>
+          </div>
+          <div class="card-footer d-flex justify-content-between">
+            <small class="text-muted">{{started}}</small>
+            <form method="post" style="margin-block-end: 0em;">
+              {{> csrf_token_field}}
+
+              <input type="hidden" name="commitment_id" value="{{id}}">
+              <button type="submit" class="btn-close" name="action" value="delete_commitment"></button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+
+    <div class="mt-4 p-2 bg-light">
+      <h4 class="mt-4 text-center">
+        Add another
+      </h4>
+
+      <form class="row gx-3 gy-2 align-items-center" method="post">
+        {{> csrf_token_field}}
+
+        <div class="col">
+          <div class="form-floating">
+            <input type="text" class="form-control" id="description" name="description" placeholder="Some stuff" required>
+            <label for="description">What are you still working on?</label>
+          </div>
+        </div>
+        <div class="col-md-4 form-floating">
+          <select id="started_ago" class="form-select" name="started_ago">
+            <option value="PT0S">Today</option>
+            <option value="P1W">A week ago</option>
+            <option value="P1N">A month ago</option>
+            <option value="P3M">3 months ago</option>
+            <option value="P6M">6 months ago</option>
+            <option value="P1Y" selected>A year ago</option>
+            <option value="P2Y">2 years ago</option>
+            <option value="P5Y">5 years ago</option>
+            <option value="P10Y">10 years ago</option>
+            <option value="P20Y">20 years ago</option>
+          </select>
+          <label for="started_ago">When did you start this?</label>
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-primary" name="action" value="add_commitment">Submit</button>
+        </div>
+      </form>
+    </div>
 
   {{/inline}}
 
