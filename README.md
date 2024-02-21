@@ -1,23 +1,111 @@
-# Let's Procrastinate
+# Let's Procrastinate | Chapter 0: `Only Passwords`
 
 > The story of how a simple website went from using only passwords to deploying passkeys.
 
-![Passwords to passkeys](./media/intro.png)
+Introducing **Let's Procrastinate**! The web app that lets you track all of the things you're actively not getting done.
 
-Moving to [FIDO2 passkeys](https://fidoalliance.org/passkeys/) is a _journey_! It's not realistic to assume your existing users will jump right in. But you don't want to slow down your early adopters either.
+![App screenshot](./media/chapter-0.png)
 
-This sample demonstrates a realistic crawl/walk/run migration from passwords to passkeys. The migration unfolds like a story with chapters. Each chapter is represented with a `git` branch 😎.
+Unfortunately, users of this version of the website can only authenticate with a password. But all that is about to change 🙂...
 
-You can navigate to each chapter in a couple of ways:
-
-- If you're just browsing using Github.com, you can jump to a different chapter by using Github's UI to [switch branches](https://docs.github.com/en/desktop/making-changes-in-a-branch/managing-branches-in-github-desktop#switching-between-branches).
-- We also provide links ➡️ in each README to easily jump to the next chapter.
-- If you want to get the most out of this sample, clone the repository locally so you can `git checkout` the desired branch and witness the changes in the code.
-
-Ok! So to get started, turn to [**Chapter 0 ➡️**](https://github.com/twistedstream/lets-procrastinate/tree/0_only-passwords) where we introduce the password-only backstory of our website:
+Once you get this version [set up](#setup) and [running](#run), turn the page to the [**➡️ next chapter**](https://github.com/twistedstream/lets-procrastinate/tree/1_offering-passkeys) of our story where we invite our users to "go passwordless" with passkeys:
 
 ```shell
-git checkout 0_only-passwords
+git checkout 1_offering-passkeys
 ```
 
-Then follow the new README.
+## Setup
+
+These instructions will assume you're running the server locally. See the [Docker](#docker) section for information on how to run it anywhere.
+
+### Environment
+
+Export the environment variables specified in [CONFIG](./CONFIG.md). For local development, you can use a `.env` file.
+
+### Database
+
+To make it easy to demonstrate, the sample uses a Google Sheets spreadsheet as its backend database. Here's how to set it up:
+
+1. Create an empty [Google Sheets spreadsheet](https://docs.google.com/spreadsheets)
+1. Create a local `.env` file
+1. Follow the steps in the [Data](./CONFIG.md#data) section of CONFIG to create a Google service account and set the corresponding variables in the `.env` file
+1. Share the spreadsheet with the service account so it has `Editor` access
+1. Set the [`GOOGLE_SPREADSHEET_ID`](./CONFIG.md#google_spreadsheet_id) variable in the `.env` file
+1. Install [Node](#node)
+1. Install [dependencies](#dependencies)
+1. Run the following script to provision the spreadsheet with the correct schema:
+
+   ```shell
+   npm run schema:apply
+   ```
+
+   You can also perform a dry run without actually changing the spreadsheet:
+
+   ```shell
+   npm run schema:apply:dry-run
+   ```
+
+### Node
+
+Install the version of Node.js specified in the [`.nvmrc`](./.nvmrc) file. The easiest way to do this is use the [nvm](https://github.com/nvm-sh/nvm) tool:
+
+```shell
+nvm install
+nvm use
+```
+
+### Self-signed TLS certificate
+
+When running in local development mode, the server uses HTTPS with a self-signed certificate for TLS communication. Generate and install the certificate using these commands:
+
+```bash
+mkdir ./cert
+./scripts/create-dev-cert.sh
+./scripts/install-dev-cert.sh
+```
+
+This creates a `dev.crt` (certificate) and `dev.key` (private key) file in the `./cert` directory. It also installs the certificate so its trusted by your local machine.
+
+### DNS
+
+Add the following line to the `/etc/hosts` file:
+
+```text
+127.0.0.1  letsprocrastinate.dev
+```
+
+### Dependencies
+
+Install dependencies
+
+```shell
+npm install
+```
+
+## Run
+
+Now we can finally run the sample!
+
+```shell
+npm run dev
+```
+
+## Docker
+
+You can also run the server within Docker since it comes with a [Dockerfile](./Dockerfile).
+
+### Local Docker
+
+To run the server in Docker locally (eg. using [Docker Desktop](https://www.docker.com/products/docker-desktop/)), you can use the following commands:
+
+| Command                    | Description                                     |
+| -------------------------- | ----------------------------------------------- |
+| `npm run image:build`      | Build the image.                                |
+| `npm run image:remove`     | Remove the image.                               |
+| `npm run container:run`    | \* Start a container based on the image         |
+| `npm run container:logs`   | Tail the logs of the current running container. |
+| `npm run container:stop`   | Stop the currently running container.           |
+| `npm run container:ssh`    | SSH into the currently running container.       |
+| `npm run container:remove` | Remove the current container.                   |
+
+\* Use a `.docker.env` file to feed the necessary [environment variables](#environment) into the container. See the [`Dockerfile`](./Dockerfile) for environment variables that are automatically being exported by Docker (eg. `PORT`).

@@ -57,4 +57,4 @@ Obtain using the following steps:
 
 ### `GOOGLE_SPREADSHEET_ID`
 
-The [spreadsheet ID](https://developers.google.com/sheets/api/guides/concepts) or Google Drive file ID of the Google Spreadsheet to use as the database.
+The [spreadsheet ID](https://developers.google.com/sheets/api/guides/concepts) or Google Drive file ID of a Google Spreadsheet to use as the database. See the [database](./README.md#database) section for more information.
