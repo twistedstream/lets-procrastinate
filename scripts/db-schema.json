@@ -18,6 +18,20 @@
         { "name": "started" },
         { "name": "user_id" }
       ]
+    },
+    {
+      "name": "credentials",
+      "columns": [
+        { "name": "id" },
+        { "name": "created" },
+        { "name": "public_key" },
+        { "name": "counter" },
+        { "name": "aaguid" },
+        { "name": "device_type" },
+        { "name": "is_backed_up" },
+        { "name": "transports" },
+        { "name": "user_id" }
+      ]
     }
   ]
 }
