@@ -1,6 +1,5 @@
 const router = require("express").Router();
 const { urlencoded } = require("body-parser");
-const bcrypt = require("bcrypt");
 
 const { usersTable } = require("../utils/data");
 const { generateCsrfToken, validateCsrfToken } = require("../utils/csrf");
@@ -8,6 +7,7 @@ const { unique } = require("../utils/identifier");
 const { now } = require("../utils/time");
 const { BadRequestError } = require("../utils/error");
 const { capturePreAuthState, signIn } = require("../utils/auth");
+const { hash } = require("../utils/password");
 
 // endpoints
 
@@ -34,7 +34,7 @@ router.post(
       throw BadRequestError("Missing: display_name");
     }
 
-    const password_hash = await bcrypt.hash(password, 10);
+    const password_hash = await hash(password);
 
     const newUser = {
       id: unique(),

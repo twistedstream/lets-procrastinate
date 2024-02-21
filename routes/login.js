@@ -1,11 +1,11 @@
 const router = require("express").Router();
 const { urlencoded } = require("body-parser");
-const bcrypt = require("bcrypt");
 
 const { usersTable } = require("../utils/data");
 const { generateCsrfToken, validateCsrfToken } = require("../utils/csrf");
 const { BadRequestError } = require("../utils/error");
 const { capturePreAuthState, signIn } = require("../utils/auth");
+const { compare } = require("../utils/password");
 
 // endpoints
 
@@ -33,7 +33,7 @@ router.post(
       (r) => r.username === username
     );
 
-    if (user && (await bcrypt.compare(password, user.password_hash))) {
+    if (user && (await compare(password, user.password_hash))) {
       const returnTo = signIn(req, user);
       return res.redirect(returnTo);
     }

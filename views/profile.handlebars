@@ -1,0 +1,79 @@
+{{#> main_layout}}
+  {{#*inline "head_scripts"}}
+  {{/inline}}
+
+  {{#*inline "body"}}
+    <h3 class="mb-4 text-center text-primary">
+      {{profile.username}}
+    </h3>
+
+    {{#if error_message}}
+    <div class="row mb-4">
+      <div class="col-md-6 offset-md-3 text-danger text-center">
+        {{error_message}}
+      </div>
+    </div>
+    {{/if}}
+    {{#if profile_updated}}
+    <div class="row mb-4">
+      <div class="col-md-6 offset-md-3 text-success text-center">
+        Profile successfully updated
+      </div>
+    </div>
+    {{/if}}
+    {{#if password_updated}}
+    <div class="row mb-4">
+      <div class="col-md-6 offset-md-3 text-success text-center">
+        Password successfully changed
+      </div>
+    </div>
+    {{/if}}
+
+    <form method="post">
+      {{> csrf_token_field}}
+
+
+      <div class="row mb-2">
+        <div class="col-md-6 offset-md-3">
+          <div class="form-floating">
+            <input type="email" class="form-control" id="username" value="{{profile.username}}" placeholder="name@example.com" readonly>
+            <label for="username">Email</label>
+          </div>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-6 offset-md-3">
+          <div class="form-floating">
+            <input type="text" class="form-control" name="display_name" id="display_name" value="{{profile.display_name}}" placeholder="John Doe" required>
+            <label for="display_name">Display name</label>
+          </div>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-6 offset-md-3">
+          <div class="form-floating">
+            <input type="password" class="form-control" name="old_password" id="old_password" placeholder="">
+            <label for="old_password">Existing password</label>
+          </div>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-6 offset-md-3">
+          <div class="form-floating">
+            <input type="password" class="form-control" name="new_password" id="new_password" placeholder="">
+            <label for="new_password">New password</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 offset-md-3 text-center">
+          <button type="submit" class="btn btn-lg btn-primary">Update</button>
+        </div>
+      </div>
+    </form>
+  {{/inline}}
+
+  {{#*inline "body_scripts"}}
+  {{/inline}}
+{{/main_layout}}
