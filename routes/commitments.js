@@ -3,7 +3,7 @@ const { urlencoded } = require("body-parser");
 
 const { commitmentsTable } = require("../utils/data");
 const { generateCsrfToken, validateCsrfToken } = require("../utils/csrf");
-const { unique } = require("../utils/identifier");
+const { newEntityId } = require("../utils/identifier");
 const { ago, formatted } = require("../utils/time");
 const { BadRequestError } = require("../utils/error");
 const { requiresAuth } = require("../utils/auth");
@@ -43,7 +43,7 @@ router.post(
         }
 
         const newCommitment = {
-          id: unique(),
+          id: newEntityId(),
           description,
           started: ago(started_ago).toISO(),
           user_id: req.user.id,

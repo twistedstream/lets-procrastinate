@@ -1,7 +1,8 @@
 const querystring = require("node:querystring");
 
 const { now } = require("./time");
-const { UnauthorizedError } = require("./error");
+const { BadRequestError, UnauthorizedError } = require("./error");
+const { newStateId } = require("./identifier");
 
 // auth helpers
 
@@ -10,6 +11,19 @@ function capturePreAuthState(req) {
   const { return_to } = req.query;
 
   req.session.return_to = return_to;
+}
+
+function beginSignIn(req, username) {
+  req.session = req.session || {};
+
+  const state = newStateId();
+
+  req.session.authentication = {
+    username,
+    state,
+  };
+
+  return state;
 }
 
 function signIn(req, user) {
@@ -30,6 +44,24 @@ function signIn(req, user) {
 
 function signOut(req) {
   req.session = null;
+}
+
+function getAuthentication(req) {
+  req.session = req.session || {};
+
+  const { state } = req.query;
+  if (!state) {
+    throw BadRequestError("Missing authentication state");
+  }
+  const { authentication } = req.session;
+  if (!authentication) {
+    throw BadRequestError("Authentication not started");
+  }
+  if (authentication.state !== state) {
+    throw BadRequestError("Bad authentication state");
+  }
+
+  return authentication;
 }
 
 function redirectToLogin(req, res) {
@@ -66,8 +98,10 @@ function requiresAuth() {
 
 module.exports = {
   capturePreAuthState,
+  beginSignIn,
   signIn,
   signOut,
+  getAuthentication,
   redirectToLogin,
   auth,
   requiresAuth,

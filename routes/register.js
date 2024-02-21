@@ -4,7 +4,7 @@ const { ConstraintViolationsError } = require("google-sheets-table");
 
 const { usersTable } = require("../utils/data");
 const { generateCsrfToken, validateCsrfToken } = require("../utils/csrf");
-const { unique } = require("../utils/identifier");
+const { newEntityId } = require("../utils/identifier");
 const { now } = require("../utils/time");
 const { BadRequestError } = require("../utils/error");
 const { capturePreAuthState, signIn } = require("../utils/auth");
@@ -38,7 +38,7 @@ router.post(
     const password_hash = await hash(password);
 
     const newUser = {
-      id: unique(),
+      id: newEntityId(),
       created: now().toISO(),
       username,
       display_name,

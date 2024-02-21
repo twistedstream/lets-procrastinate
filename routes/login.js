@@ -1,10 +1,16 @@
 const router = require("express").Router();
 const { urlencoded } = require("body-parser");
+const querystring = require("node:querystring");
 
 const { usersTable } = require("../utils/data");
 const { generateCsrfToken, validateCsrfToken } = require("../utils/csrf");
 const { BadRequestError } = require("../utils/error");
-const { capturePreAuthState, signIn } = require("../utils/auth");
+const {
+  capturePreAuthState,
+  beginSignIn,
+  signIn,
+  getAuthentication,
+} = require("../utils/auth");
 const { compare } = require("../utils/password");
 
 // endpoints
@@ -12,8 +18,10 @@ const { compare } = require("../utils/password");
 router.get("/login", async (req, res) => {
   capturePreAuthState(req);
 
+  const { login_hint } = req.query;
+
   const csrf_token = generateCsrfToken(req, res);
-  res.render("login", { csrf_token });
+  res.render("login_username", { csrf_token, username: login_hint });
 });
 
 router.post(
@@ -21,10 +29,39 @@ router.post(
   urlencoded({ extended: false }),
   validateCsrfToken(),
   async (req, res) => {
-    const { username, password } = req.body;
+    const { username } = req.body;
     if (!username) {
       throw BadRequestError("Missing: username");
     }
+
+    const state = beginSignIn(req, username);
+
+    res.redirect(`/login/password?${querystring.stringify({ state })}`);
+  }
+);
+
+router.get("/login/password", (req, res) => {
+  const authentication = getAuthentication(req);
+  const { username } = authentication;
+  if (!username) {
+    throw BadRequestError("Missing: username");
+  }
+
+  const csrf_token = generateCsrfToken(req, res);
+  res.render("login_password", { csrf_token, username });
+});
+
+router.post(
+  "/login/password",
+  urlencoded({ extended: false }),
+  validateCsrfToken(),
+  async (req, res) => {
+    const authentication = getAuthentication(req);
+    const { username } = authentication;
+    if (!username) {
+      throw BadRequestError("Missing: username");
+    }
+    const { password } = req.body;
     if (!password) {
       throw BadRequestError("Missing: password");
     }
@@ -39,7 +76,7 @@ router.post(
     }
 
     const csrf_token = generateCsrfToken(req, res);
-    res.status(400).render("login", {
+    res.status(400).render("login_password", {
       csrf_token,
       username,
       error_message: "Bad username or password",
