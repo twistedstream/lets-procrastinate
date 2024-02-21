@@ -16,7 +16,9 @@
     "container:logs": "docker logs -f \"${npm_package_name}\"",
     "container:stop": "docker stop \"${npm_package_name}\"",
     "container:ssh": "docker exec -it \"${npm_package_name}\" /bin/sh",
-    "container:remove": "docker rm -f \"${npm_package_name}\""
+    "container:remove": "docker rm -f \"${npm_package_name}\"",
+    "schema:apply": "node ./scripts/apply-schema.js",
+    "schema:apply:dry-run": "node ./scripts/apply-schema.js --dry-run"
   },
   "repository": {
     "type": "git",
@@ -37,6 +39,8 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "@googleapis/sheets": "^5.0.5",
+    "google-auth-library": "^9.6.3",
     "nodemon": "^3.0.3"
   },
   "config": {
