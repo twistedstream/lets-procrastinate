@@ -6,22 +6,27 @@ const { generateCsrfToken, validateCsrfToken } = require("../utils/csrf");
 const { unique } = require("../utils/identifier");
 const { ago, formatted } = require("../utils/time");
 const { BadRequestError } = require("../utils/error");
+const { requiresAuth } = require("../utils/auth");
 
 // endpoints
 
-router.get("/commitments", async (req, res) => {
-  const csrf_token = generateCsrfToken(req, res);
-  const { rows } = await commitmentsTable.findRows([{ asc: "started" }]);
+router.get("/commitments", requiresAuth(), async (req, res) => {
+  const { rows } = await commitmentsTable.findRows(
+    (r) => r.user_id === req.user.id,
+    [{ asc: "started" }]
+  );
   const commitments = rows.map((r) => ({
     ...r,
     started: formatted(r.started),
   }));
 
+  const csrf_token = generateCsrfToken(req, res);
   res.render("commitments", { csrf_token, commitments });
 });
 
 router.post(
   "/commitments",
+  requiresAuth(),
   urlencoded({ extended: false }),
   validateCsrfToken(),
   async (req, res) => {
@@ -40,7 +45,8 @@ router.post(
         const newCommitment = {
           id: unique(),
           description,
-          started: ago(started_ago),
+          started: ago(started_ago).toISO(),
+          user_id: req.user.id,
         };
 
         await commitmentsTable.insertRow(newCommitment);

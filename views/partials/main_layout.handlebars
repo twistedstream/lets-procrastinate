@@ -20,19 +20,26 @@
   </head>
 
   <body>
-    <div class="container">
+    <div class="container-fluid">
       <header class="d-flex flex-wrap justify-content-center py-3 px-2 mb-4 border-bottom bg-light">
         <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
           <h1>✅ Let's Procrastinate</h1>
         </a>
 
-        <div class="col-md-3 text-end">
-          <a type="button" class="btn btn-outline-primary me-2" href="/login">Login</button>
+        <div class="col-md-5 text-end">
+          {{#if user}}
+          <a href="/profile" class="btn btn-link">{{user.username}}</a>
+          <a type="button" class="btn btn-outline-primary" href="/logout">Sign out</a>
+          {{else}}
+          <a type="button" class="btn btn-outline-primary me-2" href="/login">Log in</button>
           <a type="button" class="btn btn-primary" href="/register">Sign up</a>
+          {{/if}}
         </div>
       </header>
 
+      <div class="container">
       {{> body }}
+      </div>
     </div>
 
     <script

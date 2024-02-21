@@ -1,0 +1,53 @@
+{{#> main_layout}}
+  {{#*inline "head_scripts"}}
+  {{/inline}}
+
+  {{#*inline "body"}}
+    <div class="row">
+      <div class="col text-center">
+        <h3 class="mb-4">
+          Log in
+        </h3>
+      </div>
+    </div>
+
+    {{#if error_message}}
+      <div class="row mb-4">
+        <div class="col-md-6 offset-md-3 text-danger text-center">
+          {{error_message}}
+        </div>
+      </div>
+    {{/if}}
+
+    <form method="post">
+      {{> csrf_token_field}}
+
+      <div class="row mb-2">
+        <div class="col-md-6 offset-md-3">
+          <div class="form-floating">
+            <input type="email" class="form-control" name="username" id="username" value="{{username}}" placeholder="name@example.com" required autofocus>
+            <label for="username">Email</label>
+          </div>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-6 offset-md-3">
+          <div class="form-floating">
+            <input type="password" class="form-control" name="password" id="password" placeholder="" required>
+            <label for="password">Password</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 offset-md-3 text-center">
+          <button type="submit" class="btn btn-lg btn-primary">Log in</button>
+        </div>
+      </div>
+    </form>
+  
+  {{/inline}}
+
+  {{#*inline "body_scripts"}}
+  {{/inline}}
+{{/main_layout}}

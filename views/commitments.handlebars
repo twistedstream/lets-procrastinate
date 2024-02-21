@@ -4,17 +4,18 @@
 
   {{#*inline "body"}}
     
+    {{#if commitments}}
     <h3 class="mb-4 text-center">
       All of the things
       <small class="text-muted">that I'm <u>not</u> getting done</small>
     </h3>
 
-    <div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center">
       {{#each commitments}}
       <div class="col">
-        <div class="card h-100">
+        <div class="card h-100 border-primary">
           <div class="card-body">
-            <h5 class="card-title">{{description}}</h5>
+            <h5 class="card-title text-center">{{description}}</h5>
           </div>
           <div class="card-footer d-flex justify-content-between">
             <small class="text-muted">{{started}}</small>
@@ -29,10 +30,16 @@
       </div>
       {{/each}}
     </div>
+    {{else}}
+    <h3 class="mb-4 text-center">
+      Not procrastinating anything?
+      <small class="text-muted">Yeah, right.</small>
+    </h3>
+    {{/if}}
 
-    <div class="mt-4 p-2 bg-light">
+    <div class="mt-5">
       <h4 class="mt-4 text-center">
-        Add another
+        Add {{#if commitments}}another{{else}}something{{/if}}
       </h4>
 
       <form class="row gx-3 gy-2 align-items-center" method="post">
@@ -44,23 +51,25 @@
             <label for="description">What are you still working on?</label>
           </div>
         </div>
-        <div class="col-md-4 form-floating">
-          <select id="started_ago" class="form-select" name="started_ago">
-            <option value="PT0S">Today</option>
-            <option value="P1W">A week ago</option>
-            <option value="P1N">A month ago</option>
-            <option value="P3M">3 months ago</option>
-            <option value="P6M">6 months ago</option>
-            <option value="P1Y" selected>A year ago</option>
-            <option value="P2Y">2 years ago</option>
-            <option value="P5Y">5 years ago</option>
-            <option value="P10Y">10 years ago</option>
-            <option value="P20Y">20 years ago</option>
-          </select>
-          <label for="started_ago">When did you start this?</label>
+        <div class="col-md-4">
+          <div class="form-floating">
+            <select id="started_ago" class="form-select" name="started_ago">
+              <option value="PT0S">Today</option>
+              <option value="P1W">A week ago</option>
+              <option value="P1N">A month ago</option>
+              <option value="P3M">3 months ago</option>
+              <option value="P6M">6 months ago</option>
+              <option value="P1Y" selected>A year ago</option>
+              <option value="P2Y">2 years ago</option>
+              <option value="P5Y">5 years ago</option>
+              <option value="P10Y">10 years ago</option>
+              <option value="P20Y">20 years ago</option>
+            </select>
+            <label for="started_ago">When did you start this?</label>
+          </div>
         </div>
         <div class="col-auto">
-          <button type="submit" class="btn btn-primary" name="action" value="add_commitment">Submit</button>
+          <button type="submit" class="btn btn-primary" name="action" value="add_commitment">Add</button>
         </div>
       </form>
     </div>

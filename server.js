@@ -11,13 +11,14 @@ const cookieSession = require("cookie-session");
 const cookieParser = require("cookie-parser");
 
 const package = require("./package.json");
+const { auth, redirectToLogin } = require("./utils/auth");
 const routes = require("./routes");
 
 const { COOKIE_SECRET } = process.env;
 
 const app = express();
 
-// global middlewares
+// session and authentication
 
 app.use(
   cookieSession({
@@ -25,6 +26,10 @@ app.use(
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   })
 );
+
+app.use(auth());
+
+// other global middlewares
 
 app.use(cookieParser(COOKIE_SECRET));
 
@@ -40,6 +45,13 @@ app.engine(
   })
 );
 
+// make user data available in all views
+app.use((req, res, next) => {
+  res.locals.user = req.user;
+
+  next();
+});
+
 // routes
 app.use(routes);
 
@@ -47,23 +59,35 @@ app.use(routes);
 app.use(function (_req, _res, next) {
   const err = new Error("Not Found");
   err.status = 404;
+
   next(err);
 });
 
-// error handlers
-app.use(function (err, _req, res, _next) {
-  // TODO: remove
-  console.log(">>> HANDLE");
+// error handler
+app.use(function (err, req, res, _next) {
+  const { message, status = 500 } = err;
+  const description = status >= 500 ? "Something unexpected happened" : message;
+  const details = process.env.NODE_ENV !== "production" ? err.stack : "";
 
-  const status = err.status || 500;
+  if (status === 401) {
+    console.log("Redirecting UNAUTHORIZED to login page");
+
+    return redirectToLogin(req, res);
+  }
+
+  res.status(status);
+
+  if (status === 404) {
+    return res.render("not_found");
+  }
   if (status >= 500) {
     console.error("ERROR:", err);
   }
 
-  res.status(status);
-  res.json({
-    message: err.message,
-    error: process.env.NODE_ENV !== "production" ? err : {},
+  res.render("error", {
+    status,
+    description,
+    details,
   });
 });
 

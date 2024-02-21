@@ -10,17 +10,23 @@ const private_key = Buffer.from(
   GOOGLE_AUTH_PRIVATE_KEY_BASE64,
   "base64"
 ).toString("utf-8");
+const credentials = { client_email, private_key };
 
 const commitmentsTable = new GoogleSheetsTable({
-  credentials: {
-    client_email,
-    private_key,
-  },
+  credentials,
   spreadsheetId,
   sheetName: "commitments",
   columnConstraints: { uniques: ["id"] },
 });
 
+const usersTable = new GoogleSheetsTable({
+  credentials,
+  spreadsheetId,
+  sheetName: "users",
+  columnConstraints: { uniques: ["id", "username"] },
+});
+
 module.exports = {
   commitmentsTable,
+  usersTable,
 };
