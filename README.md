@@ -1,82 +1,52 @@
-# Let's Procrastinate | Chapter 0: `Only Passwords`
+# Let's Procrastinate | Chapter 1: `Offering Passkeys`
 
 > The story of how a simple website went from using only passwords to deploying passkeys.
 
-Introducing **Let's Procrastinate**! The web app that lets you track all of the things you're actively not getting done.
+Alright! We're finally enabling passkeys!
 
-![App screenshot](./media/chapter-0.png)
+With this version of the sample, once they've signed in with their password, we're politely prompting the user if they want to "go passwordless" by enrolling a FIDO2 passkey:
 
-Unfortunately, users of this version of the website can only authenticate with a password. But all that is about to change 🙂...
+![Go passwordless](./media/chapter-1-go-passwordless.png)
 
-Once you get this version [set up](#setup) and [running](#run), turn the page to the [**➡️ next chapter**](https://github.com/twistedstream/lets-procrastinate/tree/1_offering-passkeys) of our story where we invite our users to "go passwordless" with passkeys:
+Then, the next time they sign in, they can use their passkey _instead_ of their password:
+
+![Use passkey](./media/chapter-1-use-passkey.png)
+
+Here are some other changes you may notice in this chapter:
+
+- The login page was transformed from the more classic username/password prompt to an identifier-first flow where the username is collected in the first prompt and the credential in the next. This design provides more flexibility when the user has more then one way to authenticate.
+- There is a new database table called `credentials` where passkey information is stored. Unlike a password, which usually has a 1-to-1 relationship with the user, a given user can enroll _multiple_ passkeys. This will become more important in a later chapter.
+- While tons of low-level support for passkeys is baked into most modern browsers (via the [WebAuthn API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API)) there are still some gaps in the required frontend code. The sample uses the [@simplewebauthn/browser](https://simplewebauthn.dev/docs/packages/browser) library to help with this.
+- FIDO2 also requires that you have a backend that serves up four JSON endpoints (`/attestation/option`, `/attestation/result`, `/assertion/options`, and `/assertion/result`). To assist with this, the sample leverages the [@simplewebauthn/server](https://simplewebauthn.dev/docs/packages/server) NPM package.
+- The FIDO2 WebAuthn API now has support for authentication without even typing a username! The behavior is sort of like what happens with a password manager. We call this "passkey autofill" but its more commonly known as [Conditional UI](https://passkeys.dev/docs/use-cases/bootstrapping/). Check it out by setting the [`PASSKEY_AUTOFILL_ENABLED`](./CONFIG.md#passkey_autofill_enabled) environment variable to `true`.
+
+![Passkey autofill](./media/chapter-1-passkey-autofill.png)
+
+Ready for more? Once you've got this working, check out the [**➡️ next chapter**](https://github.com/twistedstream/lets-procrastinate/tree/2_passkey-only-enrollment) where we allow users to create passkey-only accounts:
 
 ```shell
-git checkout 1_offering-passkeys
+git checkout 2_passkey-only-enrollment
 ```
 
 ## Setup
 
-These instructions will assume you're running the server locally. See the [Docker](#docker) section for information on how to run it anywhere.
-
-### Environment
-
-Export the environment variables specified in [CONFIG](./CONFIG.md). For local development, you can use a `.env` file.
-
 ### Database
 
-To make it easy to demonstrate, the sample uses a Google Sheets spreadsheet as its backend database. Here's how to set it up:
-
-1. Create an empty [Google Sheets spreadsheet](https://docs.google.com/spreadsheets)
-1. Create a local `.env` file
-1. Follow the steps in the [Data](./CONFIG.md#data) section of CONFIG to create a Google service account and set the corresponding variables in the `.env` file
-1. Share the spreadsheet with the service account so it has `Editor` access
-1. Set the [`GOOGLE_SPREADSHEET_ID`](./CONFIG.md#google_spreadsheet_id) variable in the `.env` file
-1. Install [Node](#node)
-1. Install [dependencies](#dependencies)
-1. Run the following script to provision the spreadsheet with the correct schema:
-
-   ```shell
-   npm run schema:apply
-   ```
-
-   You can also perform a dry run without actually changing the spreadsheet:
-
-   ```shell
-   npm run schema:apply:dry-run
-   ```
-
-### Node
-
-Install the version of Node.js specified in the [`.nvmrc`](./.nvmrc) file. The easiest way to do this is use the [nvm](https://github.com/nvm-sh/nvm) tool:
+There are a few schema changes we need to apply before this version of the sample will work:
 
 ```shell
-nvm install
-nvm use
+npm run schema:apply
 ```
 
-### Self-signed TLS certificate
+You can also perform a dry run without actually changing the spreadsheet:
 
-When running in local development mode, the server uses HTTPS with a self-signed certificate for TLS communication. Generate and install the certificate using these commands:
-
-```bash
-mkdir ./cert
-./scripts/create-dev-cert.sh
-./scripts/install-dev-cert.sh
-```
-
-This creates a `dev.crt` (certificate) and `dev.key` (private key) file in the `./cert` directory. It also installs the certificate so its trusted by your local machine.
-
-### DNS
-
-Add the following line to the `/etc/hosts` file:
-
-```text
-127.0.0.1  letsprocrastinate.dev
+```shell
+npm run schema:apply:dry-run
 ```
 
 ### Dependencies
 
-Install dependencies
+Install the dependency updates:
 
 ```shell
 npm install
@@ -84,28 +54,8 @@ npm install
 
 ## Run
 
-Now we can finally run the sample!
+Now we're ready to run the sample again.
 
 ```shell
 npm run dev
 ```
-
-## Docker
-
-You can also run the server within Docker since it comes with a [Dockerfile](./Dockerfile).
-
-### Local Docker
-
-To run the server in Docker locally (eg. using [Docker Desktop](https://www.docker.com/products/docker-desktop/)), you can use the following commands:
-
-| Command                    | Description                                     |
-| -------------------------- | ----------------------------------------------- |
-| `npm run image:build`      | Build the image.                                |
-| `npm run image:remove`     | Remove the image.                               |
-| `npm run container:run`    | \* Start a container based on the image         |
-| `npm run container:logs`   | Tail the logs of the current running container. |
-| `npm run container:stop`   | Stop the currently running container.           |
-| `npm run container:ssh`    | SSH into the currently running container.       |
-| `npm run container:remove` | Remove the current container.                   |
-
-\* Use a `.docker.env` file to feed the necessary [environment variables](#environment) into the container. See the [`Dockerfile`](./Dockerfile) for environment variables that are automatically being exported by Docker (eg. `PORT`).
