@@ -1,60 +1,24 @@
-# Let's Procrastinate | Chapter 1: `Offering Passkeys`
+# Let's Procrastinate | Chapter 2: `Passkey-only Enrollment`
 
 > The story of how a simple website went from using only passwords to deploying passkeys.
 
-Alright! We're finally enabling passkeys!
+Baby steps. In the previous chapter, we made it easy for an existing, password-based user to make the jump to passkeys. But there will be _some_ adventurous souls out there who won't want to deal with a password at all. In this chapter we allow a user to create an account with only a passkey:
 
-With this version of the sample, once they've signed in with their password, we're politely prompting the user if they want to "go passwordless" by enrolling a FIDO2 passkey:
+![Register with a passkey](./media/chapter-2.png)
 
-![Go passwordless](./media/chapter-1-go-passwordless.png)
+Oh, but we're not quite done yet!
 
-Then, the next time they sign in, they can use their passkey _instead_ of their password:
-
-![Use passkey](./media/chapter-1-use-passkey.png)
-
-Here are some other changes you may notice in this chapter:
-
-- The login page was transformed from the more classic username/password prompt to an identifier-first flow where the username is collected in the first prompt and the credential in the next. This design provides more flexibility when the user has more then one way to authenticate.
-- There is a new database table called `credentials` where passkey information is stored. Unlike a password, which usually has a 1-to-1 relationship with the user, a given user can enroll _multiple_ passkeys. This will become more important in a later chapter.
-- While tons of low-level support for passkeys is baked into most modern browsers (via the [WebAuthn API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API)) there are still some gaps in the required frontend code. The sample uses the [@simplewebauthn/browser](https://simplewebauthn.dev/docs/packages/browser) library to help with this.
-- FIDO2 also requires that you have a backend that serves up four JSON endpoints (`/attestation/option`, `/attestation/result`, `/assertion/options`, and `/assertion/result`). To assist with this, the sample leverages the [@simplewebauthn/server](https://simplewebauthn.dev/docs/packages/server) NPM package.
-- The FIDO2 WebAuthn API now has support for authentication without even typing a username! The behavior is sort of like what happens with a password manager. We call this "passkey autofill" but its more commonly known as [Conditional UI](https://passkeys.dev/docs/use-cases/bootstrapping/). Check it out by setting the [`PASSKEY_AUTOFILL_ENABLED`](./CONFIG.md#passkey_autofill_enabled) environment variable to `true`.
-
-![Passkey autofill](./media/chapter-1-passkey-autofill.png)
-
-Ready for more? Once you've got this working, check out the [**➡️ next chapter**](https://github.com/twistedstream/lets-procrastinate/tree/2_passkey-only-enrollment) where we allow users to create passkey-only accounts:
+What if a user wants to enroll multiple passkeys or remove a passkey? We'll cover that in the [**➡️ next (and final) chapter**](https://github.com/twistedstream/lets-procrastinate/tree/3_passkey-management) of our passkey story:
 
 ```shell
-git checkout 2_passkey-only-enrollment
+git checkout 3_passkey-management
 ```
 
 ## Setup
 
-### Database
-
-There are a few schema changes we need to apply before this version of the sample will work:
-
-```shell
-npm run schema:apply
-```
-
-You can also perform a dry run without actually changing the spreadsheet:
-
-```shell
-npm run schema:apply:dry-run
-```
-
-### Dependencies
-
-Install the dependency updates:
-
-```shell
-npm install
-```
+There's nothing new to install for this chapter. You just need the code changes that applied when you checked out the branch.
 
 ## Run
-
-Now we're ready to run the sample again.
 
 ```shell
 npm run dev
