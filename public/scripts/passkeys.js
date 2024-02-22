@@ -16,7 +16,7 @@ function arePasskeysSupported() {
 async function isPasskeyAutofillSupported() {
   const supported =
     getQueryParam("no_autofill") === null &&
-    arePasskeysSupported &&
+    arePasskeysSupported() &&
     (await browserSupportsWebAuthnAutofill());
 
   console.log("Passkey autofill supported:", supported);

@@ -41,6 +41,10 @@ Eg. `https://example.com`
 
 For local development, set to `https://letsprocrastinate.dev`, appending `:PORT` if something besides `443`.
 
+### `PASSKEY_AUTOFILL_ENABLED`
+
+Set to `true` to enable autofill of passkeys (aka. [Conditional UI](https://passkeys.dev/docs/use-cases/bootstrapping/)) in the login page.
+
 ### `COOKIE_SECRET`
 
 An arbitrary key used to encrypt and decrypt HTTP session cookies.

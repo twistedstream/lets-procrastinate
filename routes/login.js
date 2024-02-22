@@ -13,6 +13,9 @@ const {
 } = require("../utils/auth");
 const { compare } = require("../utils/password");
 
+const { PASSKEY_AUTOFILL_ENABLED } = process.env;
+const passkey_autofill_enabled = PASSKEY_AUTOFILL_ENABLED === "true";
+
 // endpoints
 
 router.get("/login", async (req, res) => {
@@ -21,7 +24,11 @@ router.get("/login", async (req, res) => {
   const { login_hint } = req.query;
 
   const csrf_token = generateCsrfToken(req, res);
-  res.render("login_username", { csrf_token, username: login_hint });
+  res.render("login_username", {
+    csrf_token,
+    username: login_hint,
+    passkey_autofill_enabled,
+  });
 });
 
 router.post(

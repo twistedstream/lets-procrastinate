@@ -1,5 +1,6 @@
 {{#> main_layout}}
   {{#*inline "head_scripts"}}
+    {{> passkey_scripts }}
   {{/inline}}
 
   {{#*inline "body"}}
@@ -25,7 +26,7 @@
       <div class="row mb-2">
         <div class="col-md-6 offset-md-3">
           <div class="form-floating">
-            <input type="email" class="form-control" name="username" id="username" value="{{username}}" placeholder="name@example.com" required autofocus>
+            <input type="email" class="form-control" name="username" id="username" autocomplete="username webauthn" value="{{username}}" placeholder="name@example.com" required autofocus>
             <label for="username">Email</label>
           </div>
         </div>
@@ -49,6 +50,22 @@
         signInForm.addEventListener("submit", async (event) => {
           disable("#continueButton");
         });
+
+        // support autofill sign-in
+        if ({{passkey_autofill_enabled}}) {
+          if (await isPasskeyAutofillSupported()) {
+            // perform autofill
+            authenticateUser()
+              .then((returnTo) => {
+                if (returnTo) {
+                  window.location = returnTo;
+                }
+              })
+              .catch((err) => {
+                return displayError(err);
+              });
+          }
+        }
       });
     </script>
   {{/inline}}
