@@ -26,7 +26,15 @@ const usersTable = new GoogleSheetsTable({
   columnConstraints: { uniques: ["id", "username"] },
 });
 
+const credentialsTable = new GoogleSheetsTable({
+  credentials,
+  spreadsheetId,
+  sheetName: "credentials",
+  columnConstraints: { uniques: ["id"] },
+});
+
 module.exports = {
   commitmentsTable,
   usersTable,
+  credentialsTable,
 };

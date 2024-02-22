@@ -13,6 +13,15 @@ function capturePreAuthState(req) {
   req.session.return_to = return_to;
 }
 
+function beginSignup(req, username, challenge) {
+  req.session = req.session || {};
+
+  req.session.registration = {
+    username,
+    challenge,
+  };
+}
+
 function beginSignIn(req, username) {
   req.session = req.session || {};
 
@@ -26,7 +35,28 @@ function beginSignIn(req, username) {
   return state;
 }
 
-function signIn(req, user) {
+function continueSignInWithPasskey(
+  req,
+  existingUser,
+  challenge,
+  userVerification
+) {
+  req.session = req.session || {};
+  const { authentication = {} } = req.session;
+  const { state } = authentication;
+
+  req.session.authentication = {
+    // will be empty when passkey autofill is happening
+    userId: existingUser?.id,
+    username: existingUser?.username,
+    // support refresh of /login/passkey page
+    state,
+    challenge,
+    userVerification,
+  };
+}
+
+function completeSignIn(req, user, credentialId) {
   req.session = req.session || {};
 
   req.session.authentication = {
@@ -35,10 +65,17 @@ function signIn(req, user) {
       username: user.username,
       display_name: user.display_name,
     },
+    // missing if user authenticated with password
+    credentialId,
     time: now().toISO(),
   };
 
   const returnTo = req.session.return_to || "/";
+
+  // clear session state that's no longer needed
+  delete req.session.registration;
+  delete req.session.return_to;
+
   return returnTo;
 }
 
@@ -46,22 +83,36 @@ function signOut(req) {
   req.session = null;
 }
 
-function getAuthentication(req) {
+function getAuthentication(req, enforceState) {
   req.session = req.session || {};
 
-  const { state } = req.query;
-  if (!state) {
-    throw BadRequestError("Missing authentication state");
-  }
   const { authentication } = req.session;
   if (!authentication) {
     throw BadRequestError("Authentication not started");
   }
-  if (authentication.state !== state) {
-    throw BadRequestError("Bad authentication state");
+
+  if (enforceState) {
+    const { state } = req.query;
+    if (!state) {
+      throw BadRequestError("Missing authentication state");
+    }
+    if (authentication.state !== state) {
+      throw BadRequestError("Bad authentication state");
+    }
   }
 
   return authentication;
+}
+
+function getRegistration(req) {
+  req.session = req.session || {};
+
+  const { registration } = req.session;
+  if (!registration) {
+    throw BadRequestError("No active registration");
+  }
+
+  return registration;
 }
 
 function redirectToLogin(req, res) {
@@ -98,10 +149,13 @@ function requiresAuth() {
 
 module.exports = {
   capturePreAuthState,
+  beginSignup,
   beginSignIn,
-  signIn,
+  continueSignInWithPasskey,
+  completeSignIn,
   signOut,
   getAuthentication,
+  getRegistration,
   redirectToLogin,
   auth,
   requiresAuth,

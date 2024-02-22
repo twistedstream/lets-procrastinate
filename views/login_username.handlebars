@@ -11,15 +11,15 @@
       </div>
     </div>
 
-    {{#if error_message}}
+    <div id="errorMessageSection" hidden>
       <div class="row mb-4">
         <div class="col-md-6 offset-md-3 text-danger text-center">
-          {{error_message}}
+          <span id="errorMessageSpan"></span>
         </div>
       </div>
-    {{/if}}
+    </div>
 
-    <form method="post">
+    <form method="post" id="sign_in_form">
       {{> csrf_token_field}}
 
       <div class="row mb-2">
@@ -33,13 +33,23 @@
 
       <div class="row">
         <div class="col-md-6 offset-md-3 text-center">
-          <button type="submit" class="btn btn-lg btn-primary">Continue</button>
+          <button type="submit" class="btn btn-lg btn-primary" id="continueButton">Continue</button>
         </div>
       </div>
     </form>
-  
   {{/inline}}
 
   {{#*inline "body_scripts"}}
+    <script>
+      window.addEventListener("load", async () => {
+        // elements
+        const signInForm = document.querySelector("#sign_in_form");
+
+        // wire up UI events
+        signInForm.addEventListener("submit", async (event) => {
+          disable("#continueButton");
+        });
+      });
+    </script>
   {{/inline}}
 {{/main_layout}}

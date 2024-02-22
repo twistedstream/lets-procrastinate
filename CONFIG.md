@@ -20,6 +20,27 @@ For local development, use `443` since TLS will be active. Use another port if 4
 
 For production, the [Dockerfile](./Dockerfile) sets this to `8000`.
 
+### `RP_ID`
+
+The ID of the RP (FIDO) server. Specifically, this is the hostname used to register and authenticate FIDO credentials.  
+Eg. `example.com`
+
+For local development, set to `letsprocrastinate.dev`.
+
+### `RP_NAME`
+
+The friendly name of the RP (FIDO) server.  
+Eg. `Let's Procrastinate`
+
+### `BASE_URL`
+
+The base URL of the server. This should be the protocol scheme and the `RP_ID`.  
+Eg. `https://example.com`
+
+> Do not use a trailing slash
+
+For local development, set to `https://letsprocrastinate.dev`, appending `:PORT` if something besides `443`.
+
 ### `COOKIE_SECRET`
 
 An arbitrary key used to encrypt and decrypt HTTP session cookies.

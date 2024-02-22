@@ -7,7 +7,7 @@ const { generateCsrfToken, validateCsrfToken } = require("../utils/csrf");
 const { newEntityId } = require("../utils/identifier");
 const { now } = require("../utils/time");
 const { BadRequestError } = require("../utils/error");
-const { capturePreAuthState, signIn } = require("../utils/auth");
+const { capturePreAuthState, completeSignIn } = require("../utils/auth");
 const { hash } = require("../utils/password");
 
 // endpoints
@@ -48,7 +48,7 @@ router.post(
     try {
       const { insertedRow: user } = await usersTable.insertRow(newUser);
 
-      const returnTo = signIn(req, user);
+      const returnTo = completeSignIn(req, user);
       res.redirect(returnTo);
     } catch (err) {
       if (

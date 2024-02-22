@@ -1,0 +1,92 @@
+{{#> main_layout}}
+  {{#*inline "head_scripts"}}
+    {{> passkey_scripts }}
+  {{/inline}}
+
+  {{#*inline "body"}}
+    <div class="passkeys_supported" hidden>
+      <div class="row">
+        <div class="col text-center">
+          <h3 class="mb-4">
+            Log in
+          </h3>
+        </div>
+      </div>
+
+      <div class="row mb-4">
+        <div class="col-md-6 offset-md-3">
+          <div class="form-floating input-group">
+            <input type="email" class="form-control" name="username" id="username" value="{{username}}" placeholder="name@example.com" disabled>
+            <label for="username">Email</label>
+            <a class="btn btn-link btn-sm pt-3" href="/login?login_hint={{username}}">Edit</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="passkeys_not_supported" hidden>
+      <div class="row mt-3">
+        <div class="col text-center" id="no_passkey_support">
+          {{> no_passkey_support }}
+        </div>
+      </div>
+    </div>
+
+    <div class="passkey_issue" hidden>
+      <div class="row mt-2">
+        <div class="col text-center">
+          Hmm, something didn't quite work.
+        </div>
+      </div>
+    </div>
+
+    <div id="errorMessageSection" hidden>
+      <div class="row mb-4">
+        <div class="col-md-6 offset-md-3 text-danger text-center">
+          <span id="errorMessageSpan"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="password_instead" hidden>
+      <div class="row mt-2">
+        <div class="col-md-6 offset-md-3 text-center">
+          <a class="btn btn-secondary" href="{{use_password_link}}">Use my password instead</a>
+        </div>
+      </div>
+    </div>
+  {{/inline}}
+
+  {{#*inline "body_scripts"}}
+    <script>
+      window.addEventListener("load", async () => {
+        // detect passkey support and update UI
+        if (arePasskeysSupported()) {
+          show(".passkeys_supported");
+        } else {
+          show(".passkeys_not_supported");
+          show(".password_instead");
+        }
+
+        // perform sign in
+        const username = "{{username}}";
+
+        let returnTo;
+        try {
+          returnTo = await authenticateUser(username);
+        } catch (err) {
+          displayError(err);
+        }
+
+        if (returnTo) {
+          window.location = returnTo;
+
+          return;
+        }
+
+        show(".passkey_issue");
+        show(".password_instead");
+      });
+    </script>
+  {{/inline}}
+{{/main_layout}}

@@ -2,13 +2,13 @@ const router = require("express").Router();
 const { urlencoded } = require("body-parser");
 const querystring = require("node:querystring");
 
-const { usersTable } = require("../utils/data");
+const { usersTable, credentialsTable } = require("../utils/data");
 const { generateCsrfToken, validateCsrfToken } = require("../utils/csrf");
 const { BadRequestError } = require("../utils/error");
 const {
   capturePreAuthState,
   beginSignIn,
-  signIn,
+  completeSignIn,
   getAuthentication,
 } = require("../utils/auth");
 const { compare } = require("../utils/password");
@@ -36,12 +36,43 @@ router.post(
 
     const state = beginSignIn(req, username);
 
-    res.redirect(`/login/password?${querystring.stringify({ state })}`);
+    // check for a passkey
+    let passkeyCount = 0;
+    const { row: user } = await usersTable.findRow(
+      (r) => r.username === username
+    );
+    if (user) {
+      const { rows: credentials } = await credentialsTable.findRows(
+        (r) => r.user_id === user.id
+      );
+
+      passkeyCount = credentials.length;
+    }
+    if (passkeyCount > 0) {
+      res.redirect(`/login/passkey?${querystring.stringify({ state })}`);
+    } else {
+      res.redirect(`/login/password?${querystring.stringify({ state })}`);
+    }
   }
 );
 
+router.get("/login/passkey", (req, res) => {
+  const authentication = getAuthentication(req, true);
+  const { username } = authentication;
+  if (!username) {
+    throw BadRequestError("Missing: username");
+  }
+
+  const { state } = req.query;
+  const use_password_link = `/login/password?${querystring.stringify({
+    state,
+  })}`;
+
+  res.render("login_passkey", { username, use_password_link });
+});
+
 router.get("/login/password", (req, res) => {
-  const authentication = getAuthentication(req);
+  const authentication = getAuthentication(req, true);
   const { username } = authentication;
   if (!username) {
     throw BadRequestError("Missing: username");
@@ -56,7 +87,7 @@ router.post(
   urlencoded({ extended: false }),
   validateCsrfToken(),
   async (req, res) => {
-    const authentication = getAuthentication(req);
+    const authentication = getAuthentication(req, true);
     const { username } = authentication;
     if (!username) {
       throw BadRequestError("Missing: username");
@@ -71,8 +102,19 @@ router.post(
     );
 
     if (user && (await compare(password, user.password_hash))) {
-      const returnTo = signIn(req, user);
-      return res.redirect(returnTo);
+      const return_to = completeSignIn(req, user);
+
+      // prompt to go passwordless if user has no passkeys yet
+      const { rows: credentials } = await credentialsTable.findRows(
+        (r) => r.user_id === user.id
+      );
+      if (credentials.length === 0) {
+        return res.redirect(
+          `/go_passwordless?${querystring.stringify({ return_to })}`
+        );
+      }
+
+      return res.redirect(return_to);
     }
 
     const csrf_token = generateCsrfToken(req, res);

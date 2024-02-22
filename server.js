@@ -13,6 +13,7 @@ const cookieParser = require("cookie-parser");
 const package = require("./package.json");
 const { auth, redirectToLogin } = require("./utils/auth");
 const routes = require("./routes");
+const { buildErrorHandlerData } = require("./utils/error");
 
 const { COOKIE_SECRET } = process.env;
 
@@ -65,9 +66,7 @@ app.use(function (_req, _res, next) {
 
 // error handler
 app.use(function (err, req, res, _next) {
-  const { message, status = 500 } = err;
-  const description = status >= 500 ? "Something unexpected happened" : message;
-  const details = process.env.NODE_ENV !== "production" ? err.stack : "";
+  const { status, description, details } = buildErrorHandlerData(err);
 
   if (status === 401) {
     console.log("Redirecting UNAUTHORIZED to login page");
