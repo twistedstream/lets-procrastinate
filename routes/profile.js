@@ -15,6 +15,10 @@ router.get("/profile", requiresAuth(), async (req, res) => {
     (r) => r.id === req.user.id
   );
 
+  const show_password_fields =
+    profile.password_hash && profile.password_hash.length > 0;
+  delete profile.password_hash;
+
   const { updated = [] } = req.query;
   const profile_updated = updated.includes("profile");
   const password_updated = updated.includes("password");
@@ -23,6 +27,7 @@ router.get("/profile", requiresAuth(), async (req, res) => {
   res.render("profile", {
     csrf_token,
     profile,
+    show_password_fields,
     profile_updated,
     password_updated,
   });
