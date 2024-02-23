@@ -1,5 +1,6 @@
 {{#> main_layout}}
   {{#*inline "head_scripts"}}
+    {{> passkey_scripts }}
   {{/inline}}
 
   {{#*inline "body"}}
@@ -28,6 +29,27 @@
       </div>
     </div>
     {{/if}}
+    {{#if passkey_added}}
+    <div class="row mb-4">
+      <div class="col-md-6 offset-md-3 text-success text-center">
+        New passkey was successfully added
+      </div>
+    </div>
+    {{/if}}
+    {{#if passkey_removed}}
+    <div class="row mb-4">
+      <div class="col-md-6 offset-md-3 text-success text-center">
+        Existing passkey was successfully removed
+      </div>
+    </div>
+    {{/if}}
+    <div id="errorMessageSection" hidden>
+      <div class="row mb-4">
+        <div class="col-md-6 offset-md-3 text-danger text-center">
+          <span id="errorMessageSpan"></span>
+        </div>
+      </div>
+    </div>
 
     <form method="post">
       {{> csrf_token_field}}
@@ -71,12 +93,128 @@
 
       <div class="row">
         <div class="col-md-6 offset-md-3 text-center">
-          <button type="submit" class="btn btn-lg btn-primary">Update</button>
+          <button type="submit" class="btn btn-lg btn-primary" name="action" value="update_profile">Update</button>
         </div>
       </div>
     </form>
+
+    {{#if passkeys}}
+    <h3 class="my-4 text-center">
+      My passkeys
+    </h3>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center">
+      {{#each passkeys}}
+      <div class="col">
+        <div class="card h-100 border-success">
+          <img 
+            src="{{#if icon}}{{icon}}{{else}}/images/passkey.png{{/if}}"
+            class="img-card-top m-2"
+            alt="passkey"
+            style="height: 50px; object-fit: contain;"
+          >
+
+          <div class="card-body">
+            <h5 class="card-title text-center">{{description}}</h5>
+            {{#if is_synced}}
+            <h6 class="card-subtitle mb-2 text-success text-center">[synced]</h6>
+            {{/if}}
+          </div>
+          
+          <div class="card-footer d-flex justify-content-between">
+            <small class="text-muted">{{created}}</small>
+            {{#if can_delete}}
+            <form method="post" style="margin-block-end: 0em;">
+              {{> csrf_token_field}}
+
+              <input type="hidden" name="credential_id" value="{{id}}">
+              <button type="submit" class="btn-close" name="action" value="delete_passkey"></button>
+            </form>
+            {{/if}}
+          </div>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+
+    <div class="passkeys_supported" hidden>
+      <div class="row">
+        <div class="col-md-6 offset-md-3 my-4 text-center">
+          <button type="button" class="btn btn-outline-primary add-passkey-button">Add new passkey</button>
+        </div>
+      </div>
+    </div>
+    {{else}}
+    <h3 class="my-4 text-center">
+      No passkeys yet
+    </h3>
+
+    <div class="passkeys_supported" hidden>
+      <div class="row">
+        <div class="col-md-6 offset-md-3 text-center">
+          <button type="button" class="btn btn-outline-primary add-passkey-button">Create one</button>
+        </div>
+      </div>
+    </div>
+    {{/if}}
+
+    <div class="passkeys_not_supported" hidden>
+      <div class="row mt-4">
+        <div class="col text-center">
+          <p>Bummer...</p>
+          Looks like your browser doesn't support passkeys, so you can't add any here.
+        </div>
+      </div>
+    </div>
   {{/inline}}
 
   {{#*inline "body_scripts"}}
+    <script>
+      // elements
+      const addButtons = document.querySelectorAll(".add-passkey-button");
+      const deleteButtons = document.querySelectorAll("button[value='delete_passkey']");
+
+      // wire up UI events
+
+      addButtons.forEach((button) => {
+        button.addEventListener("click", async (event) => {
+          event.preventDefault();
+          disable(addButtons);
+
+          let returnTo;
+          try {
+            returnTo = await registerUser();
+          } catch (err) {
+            enable(addButtons);
+            return displayError(err);
+          }
+
+          if (returnTo) {
+            window.location = "/profile?updated=passkey_added"
+            return;
+          }
+
+          enable(addButtons);
+        });
+      });
+
+      deleteButtons.forEach((b) => b.addEventListener("click", (event) => {
+        const doDelete = window.confirm(
+          "Are you sure you want to delete this passkey?\n" + 
+          "If you continue, you should also remove the passkey from its device or platform since it will no longer work.");
+
+        if (!doDelete) {
+          // cancel the form submit
+          event.preventDefault();
+        }
+      }));
+
+      // detect passkey support and update UI
+      if (arePasskeysSupported()) {
+        show(".passkeys_supported");
+      } else {
+        show(".passkeys_not_supported");
+      }
+    </script> 
   {{/inline}}
 {{/main_layout}}
