@@ -1,5 +1,6 @@
 {{#> main_layout}}
   {{#*inline "head_scripts"}}
+    {{> passkey_scripts }}
   {{/inline}}
 
   {{#*inline "body"}}
@@ -18,8 +19,15 @@
         </div>
       </div>
     {{/if}}
+    <div id="errorMessageSection" hidden>
+      <div class="row mb-4">
+        <div class="col-md-6 offset-md-3 text-danger text-center">
+          <span id="errorMessageSpan"></span>
+        </div>
+      </div>
+    </div>
 
-    <form method="post">
+    <form method="post" id="signInForm">
       {{> csrf_token_field}}
 
       <div class="row mb-2">
@@ -38,18 +46,35 @@
           </div>
         </div>
       </div>
-      <div class="row mb-2">
-        <div class="col-md-6 offset-md-3">
-          <div class="form-floating">
-            <input type="password" class="form-control" name="password" id="password" placeholder="" required>
-            <label for="password">Password</label>
+
+      <div class="passkeys_supported" hidden>
+        <div class="row">
+          <div class="col-md-6 offset-md-3 text-center">
+            <button type="submit" class="btn btn-lg btn-primary" id="passkeyButton">Sign up with a Passkey</button>
+          </div>
+        </div>
+
+        <div class="row mt-2">
+          <div class="col-md-6 offset-md-3 text-center">
+            <button class="btn btn-secondary" id="passwordInsteadButton">No thanks, use a password instead</button>
           </div>
         </div>
       </div>
 
-      <div class="row">
-        <div class="col-md-6 offset-md-3 text-center">
-          <button type="submit" class="btn btn-lg btn-primary">Sign up</button>
+      <div class="password_instead" hidden>
+        <div class="row my-2">
+          <div class="col-md-6 offset-md-3">
+            <div class="form-floating">
+              <input type="password" class="form-control" name="password" id="password" placeholder="">
+              <label for="password">Password</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 offset-md-3 text-center">
+            <button type="submit" class="btn btn-lg btn-primary">Sign up</button>
+          </div>
         </div>
       </div>
     </form>
@@ -57,5 +82,65 @@
   {{/inline}}
 
   {{#*inline "body_scripts"}}
+    <script>
+      window.addEventListener("load", async () => {
+        // elements
+        const signInForm = document.querySelector("#signInForm");
+        const usernameField = document.querySelector("#username");
+        const displayNameField = document.querySelector("#display_name");
+        const passwordInsteadButton = document.querySelector(
+          "#passwordInsteadButton"
+        );
+        const passwordField = document.querySelector("#password");
+        const passkeyButton = document.querySelector("#passkeyButton");
+
+        // state
+        let doingPasskeyRegistration;
+
+        // wire up UI events
+        signInForm.addEventListener("submit", async (event) => {
+          if (doingPasskeyRegistration) {
+            event.preventDefault();
+
+            disable(passkeyButton);
+
+            const username = usernameField.value;
+            const displayName = displayNameField.value;
+
+            let returnTo;
+            try {
+              returnTo = await registerUser(username, displayName);
+            } catch (err) {
+              enable(passkeyButton);
+              return displayError(err);
+            }
+
+            if (returnTo) {
+              return window.location = returnTo;
+            }
+            enable(passkeyButton);
+          }
+        });
+
+        passwordInsteadButton.addEventListener("click", async (event) => {
+          event.preventDefault();
+
+          hide(".passkeys_supported");
+          show(".password_instead");
+          passwordField.setAttribute("required", "");
+          passwordField.focus();
+          doingPasskeyRegistration = false;
+        });
+
+        // detect passkey support and update UI
+        if (arePasskeysSupported()) {
+          show(".passkeys_supported");
+          doingPasskeyRegistration = true;
+        } else {
+          show(".password_instead");
+          doingPasskeyRegistration = false;
+        }
+      });
+    </script>  
   {{/inline}}
 {{/main_layout}}

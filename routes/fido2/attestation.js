@@ -6,34 +6,54 @@ const {
 } = require("@simplewebauthn/server");
 const { isoBase64URL } = require("@simplewebauthn/server/helpers");
 
-const { UnauthorizedError } = require("../../utils/error");
+const { BadRequestError } = require("../../utils/error");
 const { usersTable, credentialsTable } = require("../../utils/data");
-const { beginSignup, getRegistration } = require("../../utils/auth");
+const {
+  beginSignup,
+  getRegistration,
+  completeSignIn,
+} = require("../../utils/auth");
 const { now } = require("../../utils/time");
+const { createUser } = require("../../utils/entity");
 
 const { RP_ID: rpID, RP_NAME: rpName, BASE_URL: baseUrl } = process.env;
 
 // endpoints
 
 router.post("/options", json(), async (req, res) => {
-  if (!req.user) {
-    throw UnauthorizedError("User session required");
+  const { username, displayName, attestation } = req.body;
+
+  let registeringUser;
+  let excludeCredentials;
+
+  if (req.user) {
+    // registering user is an existing user
+    const { row } = await usersTable.findRow((r) => r.id === req.user.id);
+    registeringUser = row;
+    if (!registeringUser) {
+      throw BadRequestError(`User with ID ${req.user.id} no longer exists`);
+    }
+
+    // going to exclude existing credentials
+    const { rows } = await credentialsTable.findRows(
+      (r) => r.user_id === req.user.id
+    );
+    excludeCredentials = rows;
+  } else {
+    // ensure new user is unique
+    const { row: existingUser } = await usersTable.findRow(
+      (r) => r.username === username
+    );
+    if (existingUser) {
+      throw BadRequestError("User already exists");
+    }
+
+    // register user will be a new user
+    registeringUser = createUser(username, displayName);
+
+    // no existing credentials to exclude
+    excludeCredentials = [];
   }
-
-  const { attestation } = req.body;
-
-  // registering user is an existing user
-  const { row: registeringUser } = await usersTable.findRow(
-    (r) => r.id === req.user.id
-  );
-  if (!registeringUser) {
-    throw BadRequestError(`User with ID ${req.user.id} no longer exists`);
-  }
-
-  // going to exclude existing credentials
-  const { rows: excludeCredentials } = await credentialsTable.findRows(
-    (r) => r.user_id === req.user.id
-  );
 
   // generate options
   const attestationOptions = await generateRegistrationOptions({
@@ -62,16 +82,13 @@ router.post("/options", json(), async (req, res) => {
   );
 
   // store registration state in session
-  beginSignup(req, registeringUser.username, optionsResponse.challenge);
+  beginSignup(req, registeringUser, optionsResponse.challenge);
 
   res.json(optionsResponse);
 });
 
 router.post("/result", json(), async (req, res) => {
-  if (!req.user) {
-    throw UnauthorizedError("User session required");
-  }
-
+  // validate request
   const { body } = req;
   const { id, response } = req.body;
   if (!id) {
@@ -107,7 +124,7 @@ router.post("/result", json(), async (req, res) => {
   }
   console.log("DEBUG [/fido2/attestation/result] verification:", verification);
 
-  // build credential row
+  // build validated credential
   const {
     aaguid,
     credentialPublicKey,
@@ -125,21 +142,44 @@ router.post("/result", json(), async (req, res) => {
     device_type: credentialDeviceType,
     is_backed_up: credentialBackedUp,
     transports: response.transports.join(","),
-    user_id: req.user.id,
   };
   console.log(
     "DEBUG [/fido2/attestation/result] Validated credential:",
     validatedCredential
   );
 
-  // insert new credential row
-  await credentialsTable.insertRow(validatedCredential);
+  let { user } = req;
+  let return_to = "/";
+
+  const insertCredential = async () => {
+    validatedCredential.user_id = user.id;
+    const { insertedRow: credential } = await credentialsTable.insertRow(
+      validatedCredential
+    );
+    return credential;
+  };
+
+  if (user) {
+    // create additional credential
+    await insertCredential();
+  } else {
+    // create new user with initial credential
+    const { registeringUser } = registration;
+    const { insertedRow } = await usersTable.insertRow(registeringUser);
+    user = insertedRow;
+
+    // create first credential
+    const credential = await insertCredential();
+
+    // perform sign-in with newly registered user
+    return_to = completeSignIn(req, user, credential.id);
+  }
 
   // build response
   const resultResponse = {
     status: "ok",
     errorMessage: "",
-    return_to: "/",
+    return_to,
   };
 
   res.json(resultResponse);

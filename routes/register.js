@@ -4,11 +4,10 @@ const { ConstraintViolationsError } = require("google-sheets-table");
 
 const { usersTable } = require("../utils/data");
 const { generateCsrfToken, validateCsrfToken } = require("../utils/csrf");
-const { newEntityId } = require("../utils/identifier");
-const { now } = require("../utils/time");
 const { BadRequestError } = require("../utils/error");
 const { capturePreAuthState, completeSignIn } = require("../utils/auth");
 const { hash } = require("../utils/password");
+const { createUser } = require("../utils/entity");
 
 // endpoints
 
@@ -25,25 +24,12 @@ router.post(
   validateCsrfToken(),
   async (req, res) => {
     const { username, password, display_name } = req.body;
-    if (!username) {
-      throw BadRequestError("Missing: username");
-    }
     if (!password) {
       throw BadRequestError("Missing: password");
     }
-    if (!display_name) {
-      throw BadRequestError("Missing: display_name");
-    }
 
     const password_hash = await hash(password);
-
-    const newUser = {
-      id: newEntityId(),
-      created: now().toISO(),
-      username,
-      display_name,
-      password_hash,
-    };
+    const newUser = createUser(username, display_name, password_hash);
 
     try {
       const { insertedRow: user } = await usersTable.insertRow(newUser);

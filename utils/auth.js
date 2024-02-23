@@ -13,11 +13,11 @@ function capturePreAuthState(req) {
   req.session.return_to = return_to;
 }
 
-function beginSignup(req, username, challenge) {
+function beginSignup(req, registeringUser, challenge) {
   req.session = req.session || {};
 
   req.session.registration = {
-    username,
+    registeringUser,
     challenge,
   };
 }

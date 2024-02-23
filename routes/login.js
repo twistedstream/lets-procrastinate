@@ -108,7 +108,7 @@ router.post(
       (r) => r.username === username
     );
 
-    if (user && (await compare(password, user.password_hash))) {
+    if (user?.password_hash && (await compare(password, user.password_hash))) {
       const return_to = completeSignIn(req, user);
 
       // prompt to go passwordless if user has no passkeys yet
