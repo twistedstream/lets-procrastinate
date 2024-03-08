@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const { urlencoded } = require("body-parser");
+const { ConstraintViolationsError } = require("google-sheets-table");
 
 const { usersTable } = require("../utils/data");
 const { generateCsrfToken, validateCsrfToken } = require("../utils/csrf");
@@ -50,7 +51,12 @@ router.post(
       const returnTo = signIn(req, user);
       res.redirect(returnTo);
     } catch (err) {
-      if (err.message.includes("A row already exists with username")) {
+      if (
+        err instanceof ConstraintViolationsError &&
+        err.violations.some(
+          (v) => v.type === "unique" && v.column === "username"
+        )
+      ) {
         const csrf_token = generateCsrfToken(req, res);
         return res.status(400).render("register", {
           csrf_token,
