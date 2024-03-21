@@ -25,7 +25,7 @@ The following instructions will assume you're running the server locally. See th
 
 **Environment variables**
 1. Fill in your own environment variables specified in [CONFIG](./CONFIG.md).
-2. ✅ Test config correctness by running at any point. 
+2. ✅ Test config correctness by running the following command at any point. 
    ```shell
    npm run schema:apply:dry-run
    ```
