@@ -34,7 +34,7 @@ An arbitrary key used to encrypt and decrypt CSRF tokens.
 
 Some features require access to Google APIs. Perform these steps to obtain a Google Service Account which provides the necessary credentials.
 
-1. Create a Service Account credential in the Google Cloud Console
+1. Create a Service Account credential in the Google Cloud Console (https://console.cloud.google.com/)
 1. Add a new JSON key to the Service Account, which downloads a `.json` key file
 
 ### `GOOGLE_AUTH_CLIENT_EMAIL`
