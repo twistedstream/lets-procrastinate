@@ -52,6 +52,11 @@ Obtain using the following steps:
    ```shell
    cat /path/to/google-key-file.json | json private_key | base64
    ```
+   or 
+
+   ```shell
+cat api-project-1010101.json | ./node_modules/json/lib/json.js  private_key | base64
+   ```
 
 1. Copy the resulting value into the environment variable
 
