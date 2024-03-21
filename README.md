@@ -33,7 +33,7 @@ The following instructions will assume you're running the server locally. See th
 
 ---
 
-**For those new to the Spreadsheet's API**
+**Spreadsheet's API Setup**
 
 The sample uses a Google Sheets spreadsheet as its backend database. Here's how to set it up:
 
