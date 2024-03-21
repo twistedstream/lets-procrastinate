@@ -93,7 +93,7 @@ app.use(function (err, req, res, _next) {
 
 // start the server
 const server =
-  process.env.NODE_ENV === 'production'
+  process.env.NODE_ENV !== 'production'
     ? http.createServer(app)
     : https.createServer(
         {
