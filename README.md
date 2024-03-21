@@ -30,9 +30,12 @@ The following instructions will assume you're running the server locally. See th
    npm run schema:apply:dry-run
    ```
    
-**For those new to Spreadsheets API**
 
-To make it easy to demonstrate, the sample uses a Google Sheets spreadsheet as its backend database. Here's how to set it up:
+---
+
+**For those new to the Spreadsheet's API**
+
+The sample uses a Google Sheets spreadsheet as its backend database. Here's how to set it up:
 
 1. Create an empty [Google Sheets spreadsheet](https://docs.google.com/spreadsheets)
 
@@ -46,6 +49,10 @@ To make it easy to demonstrate, the sample uses a Google Sheets spreadsheet as i
    ```shell
    npm run schema:apply
    ```
+---
+
+
+
 
 
 ### Node
