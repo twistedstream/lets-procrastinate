@@ -31,6 +31,7 @@ The following instructions will assume you're running the server locally. See th
    ```
    
 **For those new to Spreadsheets API**
+
 To make it easy to demonstrate, the sample uses a Google Sheets spreadsheet as its backend database. Here's how to set it up:
 
 1. Create an empty [Google Sheets spreadsheet](https://docs.google.com/spreadsheets)
