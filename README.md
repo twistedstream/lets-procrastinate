@@ -16,34 +16,36 @@ git checkout 1_offering-passkeys
 
 ## Setup
 
-These instructions will assume you're running the server locally. See the [Docker](#docker) section for information on how to run it anywhere.
+The following instructions will assume you're running the server locally. See the [Docker](#docker) section for production environments.
 
-### Environment
+**Prerequisites for running locally**
+1. Install [Node](#node)
+1. Install [dependencies](#dependencies)
+1. Create a local `.env` file or rename [.sample.env](#.sample.env) to `.env`
 
-Export the environment variables specified in [CONFIG](./CONFIG.md). For local development, you can use a `.env` file.
-
-### Database
-
+**Environment variables**
+1. Fill in your own environment variables specified in [CONFIG](./CONFIG.md).
+2. ✅ Test config correctness by running at any point. 
+   ```shell
+   npm run schema:apply:dry-run
+   ```
+   
+**For those new to Spreadsheets API**
 To make it easy to demonstrate, the sample uses a Google Sheets spreadsheet as its backend database. Here's how to set it up:
 
 1. Create an empty [Google Sheets spreadsheet](https://docs.google.com/spreadsheets)
-1. Create a local `.env` file
+
 1. Follow the steps in the [Data](./CONFIG.md#data) section of CONFIG to create a Google service account and set the corresponding variables in the `.env` file
 1. Share the spreadsheet with the service account so it has `Editor` access
+ ![Google Spreadsheet share](./media/share-spreadsheet_900.png)
+
 1. Set the [`GOOGLE_SPREADSHEET_ID`](./CONFIG.md#google_spreadsheet_id) variable in the `.env` file
-1. Install [Node](#node)
-1. Install [dependencies](#dependencies)
 1. Run the following script to provision the spreadsheet with the correct schema:
 
    ```shell
    npm run schema:apply
    ```
 
-   You can also perform a dry run without actually changing the spreadsheet:
-
-   ```shell
-   npm run schema:apply:dry-run
-   ```
 
 ### Node
 
