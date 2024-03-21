@@ -48,8 +48,8 @@ The sample uses a Google Sheets spreadsheet as its backend database. Here's how 
    npm run schema:apply
    ```
 ---
-
-
+Appendix
+---
 
 
 
