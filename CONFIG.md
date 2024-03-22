@@ -50,7 +50,7 @@ Obtain using the following steps:
 1. Use the following command to extract the private key from the key file into a base-64 string:
 
    ```shell
-   cat api-project-1010101.json | ./node_modules/json/lib/json.js  private_key | base64
+   cat /path/to/google-key-file.json | ./node_modules/json/lib/json.js  private_key | base64
    ```
 1. Copy the resulting value into the environment variable
 
