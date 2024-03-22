@@ -6,7 +6,7 @@ const {
 } = require("@simplewebauthn/server");
 const { isoBase64URL } = require("@simplewebauthn/server/helpers");
 
-const { UnauthorizedError } = require("../../utils/error");
+const { BadRequestError, UnauthorizedError } = require("../../utils/error");
 const { usersTable, credentialsTable } = require("../../utils/data");
 const { beginSignup, getRegistration } = require("../../utils/auth");
 const { now } = require("../../utils/time");
